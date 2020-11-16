@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mvp.mapper.CommentMapper">
+	<insert id="insert_comment">
+		insert into media_comment (c_no, no, reply, writer)
+		values (seq_comment.nextval, #{no}, #{reply}, #{writer})
+	</insert>
+
+	<select id="lookup_comment" resultType="com.mvp.domain.CommentVO">
+		select * from media_comment where c_no = #{c_no}
+	</select>
+
+	<delete id="delete_comment">
+		delete from media_comment where c_no = #{c_no}
+	</delete>
+	<update id="modify_comment">
+		update media_comment set reply=#{reply} where c_no=#{c_no}
+	</update>
+
+	<select id="ListPaging" resultType="com.mvp.domain.CommentVO">
+		<![CDATA[
+		select c_no, no, reply, writer, c_date, updatedate
+		from
+		(
+		select /*+INDEX(media_comment idx_reply) */
+			rownum rn, c_no, no, reply, writer, c_date, updatedate
+		from media_comment
+		where no = #{no}
+		and c_no > 0
+		and rownum <= #{cri.pageNum} * #{cri.amount}
+		) where rn > (#{cri.pageNum} -1) * #{cri.amount}
+		]]>
+	</select>
+
+	<select id="count_comment" resultType="int">
+		<![CDATA[
+		select count(c_no) from media_comment where no = #{no}
+		]]>
+	</select>
+
+
+</mapper>

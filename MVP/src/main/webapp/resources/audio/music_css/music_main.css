@@ -1,0 +1,68 @@
+
+table{border-collapse:collapse;}
+body{font-family: NBG,HelveticaNeue-Light,AppleSDGothicNeo-Light,sans-serif;}
+
+.badge_track_info{
+    padding-left: 25px;
+}
+.badge_title{
+    font-size: 25px;
+    margin: 0;
+    font-weight: 600;
+    padding-left: 11px;
+    padding-top: 20px;
+}
+.badge_artist {
+    font-size: 17px;
+    font-weight: 600;
+    padding-bottom: 27px;
+    padding-top: 25px;
+    padding-left: 11px;
+}
+.track_list_table {
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    width: 1000px;
+}
+.track_tbody{
+    border-top: 1px solid #d2d2d2;
+    font-size: 13px;
+}
+.track_head{
+    display: flex;
+    float: right;
+    padding-bottom: 15px;
+    padding-top: 30px;
+    padding-right: 20px;
+}
+.track_head2{
+    padding: 8px;
+   /* border: 1px solid;
+    border-radius: 100px;
+    width: 69px;
+    font-size: 14px;
+    text-align: center;
+    margin: 7px;
+    background-color: white;*/
+}
+.track_head_list{
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-color: white;
+}
+.track_head_list2{
+    width: 12px;
+}
+.track_head_span{
+    font-size: 16px;
+}
+.title_artist{
+    padding-bottom: 25px;
+    padding-left: 11px;
+}
+.form_button{
+    border: none;
+    background-color: #333232;
+    cursor: pointer;
+}

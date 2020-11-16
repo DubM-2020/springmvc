@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mvp.mapper.LikeMapper">
+
+    <select id="countByLike" resultType="int" parameterType="HashMap">
+   	SELECT COUNT(like_no) as cnt
+   	FROM history_like
+   	WHERE media_no=#{media_no} AND id=#{id}
+  	</select>
+
+    <insert id="create" parameterType="HashMap">
+    INSERT INTO history_like(like_no, media_no, id, like_check)
+    VALUES ((SELECT NVL(MAX(like_no), 0) + 1 as like_no FROM history_like),
+                 #{media_no}, #{id}, 0)
+  	</insert>
+
+    <update id="like_check" parameterType="HashMap">
+    UPDATE history_like
+    SET like_check = like_check + 1
+    WHERE id=#{id} AND media_no=#{media_no}
+  	</update>
+
+    <update id="like_check_cancel" parameterType="HashMap">
+    UPDATE history_like
+    SET like_check = 0
+    WHERE id=#{id} AND media_no=#{media_no}
+  	</update>
+
+    <select id="read" resultType="com.mvp.domain.History_LikeVO" parameterType="HashMap">
+    SELECT *
+    FROM history_like
+    WHERE media_no=#{media_no} AND id=#{id}
+ 	</select>
+
+    <delete id="deleteByNo" parameterType="int">
+    DELETE FROM history_like
+    WHERE media_no=#{media_no}
+  	</delete>
+
+    <delete id="deleteById" parameterType="String">
+    DELETE FROM history_like
+    WHERE id=#{id}
+  	</delete>
+
+    <!--	like check-->
+
+    <update id="media_like_up" parameterType="int">
+    UPDATE media
+    SET m_like = m_like + 1
+    WHERE no=#{media_no}
+  	</update>
+    <update id="media_like_down" parameterType="int">
+    UPDATE media
+    SET m_like = m_like - 1
+    WHERE no=#{media_no}
+  	</update>
+
+    <select id="check_like" resultType="Integer" parameterType="HashMap">
+        select like_check
+        from history_like
+        where media_no=#{no} and id=#{id}
+    </select>
+
+    <!--<insert id="insert_like">
+        insert into history_like (media_no, id)
+        values (#{media_no}, #{id})
+    </insert>
+    <delete id="delete_like">
+        delete from history_like where media_no = #{media_no} and id = #{id}
+    </delete>
+
+    <select id="update_like">
+        UPDATE media
+        SET
+        m_like = (SELECT COUNT(*)
+        FROM history_like
+        WHERE media_no = #{media_no})
+        WHERE no = #{no}
+    </select>
+
+    <select id="getLike" resultType="int">
+        select count(no) from history_like where media_no = #{media_no} and id = #{id}
+    </select>-->
+
+
+</mapper>

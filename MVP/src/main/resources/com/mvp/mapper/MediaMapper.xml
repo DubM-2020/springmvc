@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mvp.mapper.MediaMapper">
+
+    <resultMap id="totalMap" type="HashMap">
+        <!--audio-->
+        <id column="no" property="no"/>
+        <id column="singer" property="singer"/>
+        <id column="content" property="content"/>
+        <!--media-->
+        <id column="title" property="title"/>
+        <id column="category" property="category"/>
+        <id column="count" property="count"/>
+        <id column="m_like" property="m_like"/>
+        <id column="type" property="type"/>
+        <!--file-->
+        <id column="uuid" property="uuid"/>
+        <id column="fileName" property="fileName"/>
+        <id column="uploadPath" property="uploadPath"/>
+        <id column="image" property="image"/>
+        <!--like-->
+        <id column="id" property="id"/>
+        <id column="media_no" property="media_no"/>
+        <id column="pmp3" property="pmp3"/>
+    </resultMap>
+
+    <select id="total_list" resultMap="totalMap">
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        a.singer,a.content,f.fileName
+        from media m,audio a,mvp_file f
+        where  image=1 and m.no = a.no and m.no=f.no
+    </select>
+
+    <!--
+    <select id="total_list" resultMap="totalMap">
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        a.singer,a.content
+        from media m,audio a
+        where m.no = a.no
+    </select>
+    -->
+
+    <!--select m.no,m.title,m.category,m.count,m.m_like,m.type,
+    a.singer,a.content , f.fileName , f.image
+    from media m,audio a , mvp_file f
+    where m.no = a.no and m.no = f.no and singer = #{singer}-->
+
+    <select id="sing_list" resultMap="totalMap">
+    select m.*,a.singer,a.content,f.filename,f.image,b.pmp3
+    from media m,audio a,mvp_file f left join(select filename as pmp3, no from mvp_file where image=0 order by no)
+    b on b.no=f.no where image=1 and m.no = a.no and m.no = f.no and singer=#{singer}
+    </select>
+
+    <select id="video_type" resultType="com.mvp.domain.MediaVO">
+        select * from media where no > 0
+    </select>
+
+    <select id="watch" resultType="com.mvp.domain.MediaVO">
+        select * from media where no = #{no}
+    </select>
+
+    <select id="fileName" resultType="com.mvp.domain.FileVO">
+        select m.no, f.fileName
+        from media m,mvp_file f
+        where  image=0 and m.no = f.no and m.no =#{no}
+    </select>
+
+    <select id="relation_list" resultMap="totalMap">
+        <![CDATA[
+        select  m.no,m.title,m.category,m.count,m.m_like,m.type,
+        f.filename,f.image
+        from media m, mvp_file f
+        where m.no = f.no and f.image='1' and
+        m.type ='1' and rownum > 0 and rownum <= 11
+        and m.category= #{category}
+        ORDER BY round(dbms_random.value(0,10))
+        ]]>
+    </select>
+
+    <select id="read" resultType="com.mvp.domain.MediaVO">
+        select * from media where no = #{no}
+    </select>
+
+    <update id="count">
+        update media
+        set count = count + 1
+        where no = #{no}
+    </update>
+
+    <select id="searchList" resultMap="totalMap">
+        <choose>
+            <when test="opt == 1">
+                select f.filename,f.image,a.*
+                from (select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                a.singer,a.content
+                from media m left join audio a
+                on m.no = a.no)a, mvp_file f
+                where f.no=a.no and f.image = 1 and upper(a.title||a.singer||a.content) like upper('%'||#{keyword}||'%')
+            </when>
+            <when test="opt == 2">
+                select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                a.singer,a.content,f.filename,f.image,singer
+                from mvp_file f, media m,audio a
+                where f.image = 1 and m.no = f.no and m.no = a.no and upper(m.title||a.singer||a.content) like upper('%'||#{keyword}||'%')
+            </when>
+            <when test="opt == 3">
+                select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                f.filename,f.image
+                from media m , mvp_file f
+                where m.no=f.no and image = 1 and upper(m.title) like upper('%'||#{keyword}||'%')
+            </when>
+        </choose>
+    </select>
+
+    <select id="allList" resultMap="totalMap">
+    select a.*
+    from (select m.no,m.title,m.category,m.count,m.m_like,m.type,a.singer,a.content
+      from media m left join audio a on m.no = a.no)a
+	</select>
+
+    <select id="category_list" resultMap="totalMap">
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        a.singer,a.content,f.filename
+        from media m,audio a,mvp_file f
+        where upper(m.category) = #{category} and f.image = 1 and m.no = a.no and m.no=f.no
+    </select>
+
+    <select id="start_list" resultMap="totalMap">
+        <![CDATA[
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        a.singer,a.content,f.filename
+        from media m,audio a,mvp_file f
+        where  image=1 and m.no = a.no and m.no=f.no and a.no<=6
+        order by a.no
+        ]]>
+    </select>
+
+    <select id="best_list" resultMap="totalMap">
+        <choose>
+            <when test="_parameter == 1">
+                select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                a.singer,a.content,f.filename
+                from media m,audio a,mvp_file f
+                where m.type=0 and image=1 and m.no = a.no and m.no=f.no
+                order by count desc
+            </when>
+            <when test="_parameter==2">
+                select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                a.singer,a.content,f.filename
+                from media m,audio a,mvp_file f
+                where m.type=0 and image=1 and m.no = a.no and m.no=f.no
+                order by m_like desc
+            </when>
+            <when test="_parameter==3">
+                select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                f.filename
+                from media m,mvp_file f
+                where  m.type=1 and image=1 and m.no=f.no
+                order by count desc
+            </when>
+            <when test="_parameter==4">
+                select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                f.filename
+                from media m,mvp_file f
+                where  m.type=1 and image=1 and m.no=f.no
+                order by m_like desc
+            </when>
+        </choose>
+    </select>
+
+    <select id="scroll_list" resultMap="totalMap">
+        <![CDATA[
+            select m.no,m.title,m.category,m.count,m.m_like,m.type,
+                   a.singer,a.content,f.filename
+            from media m,audio a,mvp_file f
+            where  image=1 and m.no = a.no and m.no=f.no
+              and a.no>=#{no} and a.no<#{no}+6 order by a.no
+        ]]>
+    </select>
+
+    <select id="video_category" resultMap="totalMap">
+        select  m.no,m.title,m.category,m.count,m.m_like,m.type,
+        f.fileName,f.image
+        from media m, mvp_file f
+        where m.no = f.no
+        and upper(m.category) = #{category}
+    </select>
+
+    <select id="topFiveVideo" resultMap="totalMap">
+        <![CDATA[
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        f.filename
+        from (select * from media order by count * m_like desc) m,mvp_file f
+        where  m.type=1 and image=1 and m.no=f.no and rownum <= 6
+         ]]>
+    </select>
+
+    <select id="topFiveAudio" resultMap="totalMap">
+        <![CDATA[
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        a.singer,a.content,f.filename,f.image
+        from (select * from media order by count * m_like desc) m,audio a,mvp_file f
+        where m.type=0 and image=1 and m.no = a.no and m.no = f.no and rownum <= 6
+         ]]>
+    </select>
+
+    <select id="video_list" resultMap="totalMap">
+        <![CDATA[
+        select m.no,m.title,m.category,m.count,m.m_like,m.type,
+        f.filename
+        from media m,mvp_file f
+        where  image=1 and m.no=f.no and m.no > 0 and type = 1
+        order by m.no
+        ]]>
+    </select>
+
+</mapper>

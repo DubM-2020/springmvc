@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mvp.mapper.AudioMapper">
+
+	<select id="getList" resultType="com.mvp.domain.AudioVO">
+		<![CDATA[
+			select * from audio where no >0
+		]]>
+	</select>
+
+	<select id="mediaGetList" resultType="com.mvp.domain.MediaVO">
+		<![CDATA[
+			select * from media where no >0
+		]]>
+	</select>
+
+	<select id="read" resultType="com.mvp.domain.AudioVO">
+		select * from audio where no = #{no}
+	</select>
+
+	<select id="mediaRead" resultType="com.mvp.domain.MediaVO">
+		select * from media where no = #{no}
+	</select>
+
+	<select id="getfile" resultType="com.mvp.domain.FileVO">
+		select
+        f.no,f.fileName
+        from media m, mvp_file f
+        where image=1 and m.no = f.no and m.no = #{no}
+	</select>
+
+	<select id="getfile2" resultType="com.mvp.domain.FileVO">
+		select
+        f.no,f.fileName
+        from media m, mvp_file f
+        where image=0 and m.no = f.no and m.no = #{no}
+	</select>
+
+	<select id="checkId" resultType="com.mvp.domain.MemberVO">
+		select id from mvp_member
+	</select>
+
+	<!--GetMapping-->
+	<resultMap id="playerMap" type="HashMap">
+		<!--audio-->
+		<id column="no" property="no"/>
+		<id column="singer" property="singer"/>
+		<id column="content" property="content"/>
+		<!--media-->
+		<id column="title" property="title"/>
+		<id column="category" property="category"/>
+		<id column="count" property="count"/>
+		<id column="m_like" property="m_like"/>
+		<id column="type" property="type"/>
+		<!--file-->
+		<id column="uuid" property="uuid"/>
+		<id column="fileName" property="fileName"/>
+		<id column="uploadPath" property="uploadPath"/>
+		<id column="image" property="image"/>
+		<!--like-->
+		<id column="id" property="id"/>
+		<id column="media_no" property="media_no"/>
+		<id column="pmp3" property="pmp3"/>
+		<id column="h_no" property="h_no"/>
+		<!--member--> <!--history-->
+	</resultMap>
+
+	<select id="play_list" resultMap="playerMap">
+	select m.title,m.category,m.type, h.h_no,
+    a.singer,a.content,f.filename,f.image, b.pmp3 from media m,audio a,history h ,mvp_file f
+    left join(select filename as pmp3, no from mvp_file where image=0 order by no)
+    b on b.no=f.no where image=1 and m.no = a.no and m.no = f.no and h.audio_no = a.no
+	order by h.h_no
+	</select>
+
+
+	<!--PostMapping-->
+	<resultMap id="audioMap" type="com.mvp.domain.AudioVO">
+		<id column="no" property="no"/>
+		<result property="no" column="no" />
+		<result property="singer" column="singer" />
+		<result property="content" column="content" />
+		<collection property="mem" resultMap="memberMap" />
+		<collection property="his" resultMap="hisMap" />
+	</resultMap>
+	<resultMap id="memberMap" type="com.mvp.domain.MemberVO">
+		<result property="id" column="id" />
+		<result property="pwd" column="pwd" />
+		<result property="name" column="name" />
+		<result property="email" column="email" />
+		<result property="auth" column="auth" />
+		<result property="regDate" column="regDate" />
+		<result property="enabled" column="enabled" />
+	</resultMap>
+	<resultMap id="hisMap" type="com.mvp.domain.HistoryVO">
+		<result property="h_no" column="h_no" />
+		<result property="id" column="id" />
+	</resultMap>
+
+	<insert id="play_check">
+    	insert into HISTORY (h_no, audio_no, id)
+    	values (history_seq.nextval, #{audio_no}, #{id})
+    </insert>
+
+	<delete id="play_delete">
+		delete from HISTORY where h_no = #{h_no}
+	</delete>
+
+</mapper>
+
+
